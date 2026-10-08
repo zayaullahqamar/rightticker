@@ -1,0 +1,27 @@
+# RightTicker .gitignore
+
+# Dependencies
+node_modules/
+
+# Archives & Temporary files
+*.zip
+*.tar.gz
+deploy.zip
+full_repo.zip
+
+# Database files
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+
+# Environment & credentials
+.env
+.env.local
+*.log
+askpass.bat
+scripts/tools/
+
+# OS metadata
+.DS_Store
+Thumbs.db

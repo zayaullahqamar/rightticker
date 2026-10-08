@@ -1,0 +1,17 @@
+# RightTicker Data Directory Security & Caching
+# 1. Deny HTTP access to database files
+<FilesMatch "\.(sqlite|db|json|lock)$">
+    <IfModule authz_core_module>
+        Require all denied
+    </IfModule>
+    <IfModule !authz_core_module>
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# 2. Cache stocks-data.js efficiently
+<Files "stocks-data.js">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "public, max-age=86400, stale-while-revalidate=604800"
+    </IfModule>
+</Files>
