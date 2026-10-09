@@ -5,12 +5,79 @@ const metric=(key,value)=>display(value,columns.find(c=>c.key===key));
 function openView(name){if(!['overview','screener','watchlist'].includes(name))return;activeView=name;document.querySelectorAll('.site-view').forEach(v=>v.hidden=v.id!=='view-'+name);document.querySelectorAll('.nav-tab').forEach(b=>{const on=b.dataset.view===name;b.classList.toggle('active',on);b.setAttribute('aria-selected',String(on));b.tabIndex=on?0:-1;});if(name==='overview')renderOverview();if(name==='watchlist')renderWatchlist();requestAnimationFrame(()=>{fitViewport();syncScrollControls();if(typeof fitOverview==='function')fitOverview();});}
 function selectStock(ticker){const s=stocks.find(s=>s.ticker===ticker);if(!s)return;if(!overviewMatches().includes(s))$('#overviewType').value='';currentStock=s;$('#overviewSearch').value=s.ticker;openView('overview');}
 function findStock(input){const text=input.trim().replace(/^NSE:/i,'').replace(/\.ns$/i,'').toLowerCase();return stocks.find(s=>s.ticker.toLowerCase()===text||s.name.toLowerCase()===text)||stocks.find(s=>text.length>1&&s.name.toLowerCase().includes(text));}
+function renderRangeBar(s){
+ const price=Number.isFinite(s.price)?s.price:0;
+ const low=Number.isFinite(s.low52)?s.low52:price;
+ const high=Number.isFinite(s.high52)?s.high52:price;
+ const spread=high>low?high-low:1;
+ const pct=Math.max(0,Math.min(100,((price-low)/spread)*100));
+ let zoneLabel='Mid-Range ('+pct.toFixed(0)+'%)';
+ if(pct<=25)zoneLabel='🟢 Near 52W Low (Bargain Zone)';
+ else if(pct>=75)zoneLabel='🔥 Near 52W High (Momentum)';
+ else zoneLabel='⚖️ Mid 52W Range ('+pct.toFixed(0)+'%)';
+ let valPill='<span class="val-pill neutral">52-Week Range</span>';
+ let fairZoneHtml='';
+ if(Number.isFinite(s.intrinsicMin)&&s.intrinsicMin>0){
+  const minInt=s.intrinsicMin;
+  const maxInt=Number.isFinite(s.intrinsicMax)?s.intrinsicMax:minInt;
+  if(price>maxInt){
+   const over=((price-maxInt)/maxInt)*100;
+   valPill='<span class="val-pill overvalued">⚠️ Premium +'+over.toFixed(0)+'%</span>';
+  }else if(price<minInt){
+   const under=((minInt-price)/minInt)*100;
+   valPill='<span class="val-pill undervalued">✨ Undervalued by '+under.toFixed(0)+'%</span>';
+  }else{
+   valPill='<span class="val-pill fair">🎯 Fair Value Range</span>';
+  }
+  if(spread>0){
+   const fLeft=Math.max(0,Math.min(100,((minInt-low)/spread)*100));
+   const fRight=Math.max(0,Math.min(100,((maxInt-low)/spread)*100));
+   const fWidth=Math.max(2,fRight-fLeft);
+   fairZoneHtml='<div class="range-fair-zone" style="left:'+fLeft.toFixed(1)+'%;width:'+fWidth.toFixed(1)+'%" title="Estimated Fair Value: ₹'+minInt.toFixed(0)+' – ₹'+maxInt.toFixed(0)+'"></div>';
+  }
+ }
+ return `<div class="visual-range-card" id="visualRangeHero"><div class="range-header"><span class="range-title">52-Week Range & Valuation</span><div class="range-verdict">${valPill}</div></div><div class="range-track-container"><div class="range-track">${fairZoneHtml}<div class="range-pointer" style="left:${pct.toFixed(1)}%"><div class="pointer-bubble">₹${price.toFixed(2)}</div><div class="pointer-pin"></div></div></div></div><div class="range-labels"><div class="range-bound low"><small>52W Low</small><strong>₹${low.toFixed(2)}</strong></div><div class="range-zone-tag">${zoneLabel}</div><div class="range-bound high"><small>52W High</small><strong>₹${high.toFixed(2)}</strong></div></div></div>`;
+}
+
+function renderHealthChecklist(s){
+ const averages=STOCK_DATABASE.sectorAverages[s.sector]||{};
+ const bulls=[],bears=[];
+ if(Number.isFinite(s.roe)&&s.roe>=15)bulls.push({title:'High ROE ('+s.roe.toFixed(1)+'%)',sub:'Strong return generated on shareholder capital',score:10});
+ if(Number.isFinite(s.de)&&s.de<0.4)bulls.push({title:'Low Debt-to-Equity ('+s.de.toFixed(2)+')',sub:'Conservative balance sheet with minimal leverage',score:9});
+ if(Number.isFinite(s.profitGrowth)&&s.profitGrowth>=12)bulls.push({title:'YoY Profit Surge (+'+s.profitGrowth.toFixed(1)+'%)',sub:'Double-digit bottom line expansion',score:8});
+ if(Number.isFinite(s.revenueGrowth)&&s.revenueGrowth>=10)bulls.push({title:'Solid Revenue Growth (+'+s.revenueGrowth.toFixed(1)+'%)',sub:'Healthy top-line commercial growth',score:8});
+ if(Number.isFinite(s.holding)&&s.holding>=50)bulls.push({title:'High Promoter Stake ('+s.holding.toFixed(1)+'%)',sub:'Strong insider conviction and alignment',score:7});
+ if(Number.isFinite(s.fcf)&&s.fcf>=3)bulls.push({title:'Positive FCF Yield ('+s.fcf.toFixed(1)+'%)',sub:'Generates real surplus cash flow',score:7});
+ if(Number.isFinite(s.pe)&&Number.isFinite(averages.pe)&&s.pe>0&&s.pe<averages.pe*0.85)bulls.push({title:'Discount vs Sector P/E',sub:'P/E '+s.pe.toFixed(1)+' vs sector '+averages.pe.toFixed(1),score:6});
+ if(Number.isFinite(s.dividend)&&s.dividend>=1.5)bulls.push({title:'Generous Dividend ('+s.dividend.toFixed(2)+'%)',sub:'Regular shareholder cash distributions',score:5});
+ if(Number.isFinite(s.current)&&s.current>=1.5)bulls.push({title:'Healthy Liquidity (CR '+s.current.toFixed(2)+')',sub:'Current assets comfortably cover short liabilities',score:5});
+ if(Number.isFinite(s.growth3)&&s.growth3>=5)bulls.push({title:'Positive 3M Momentum (+'+s.growth3.toFixed(1)+'%)',sub:'Outperforming recent quarterly trend',score:4});
+
+ if(Number.isFinite(s.de)&&s.de>1.2)bears.push({title:'High Debt-to-Equity ('+s.de.toFixed(2)+')',sub:'Substantial leverage elevates risk',score:10});
+ if(Number.isFinite(s.profitGrowth)&&s.profitGrowth<0)bears.push({title:'Declining Profit (YoY '+s.profitGrowth.toFixed(1)+'%)',sub:'Earnings contracted vs prior period',score:9});
+ if(Number.isFinite(s.revenueGrowth)&&s.revenueGrowth<0)bears.push({title:'Contracting Revenue (YoY '+s.revenueGrowth.toFixed(1)+'%)',sub:'Sales slowed compared to last year',score:8});
+ if(Number.isFinite(s.holding)&&s.holding<35)bears.push({title:'Low Promoter Stake ('+s.holding.toFixed(1)+'%)',sub:'Sub-35% insider equity stake',score:7});
+ if(Number.isFinite(s.pe)&&Number.isFinite(averages.pe)&&s.pe>averages.pe*1.35)bears.push({title:'Premium Valuation vs Sector',sub:'P/E '+s.pe.toFixed(1)+' vs sector average '+averages.pe.toFixed(1),score:7});
+ if(Number.isFinite(s.current)&&s.current<1.0)bears.push({title:'Tight Working Capital (CR '+s.current.toFixed(2)+')',sub:'Current liabilities exceed current assets',score:6});
+ if(Number.isFinite(s.growth3)&&s.growth3<-8)bears.push({title:'3-Month Price Slump ('+s.growth3.toFixed(1)+'%)',sub:'Weak medium-term price momentum',score:5});
+ if(Number.isFinite(s.fcf)&&s.fcf<0)bears.push({title:'Negative Free Cash Flow',sub:'Operations burning cash after capex',score:6});
+ if(Number.isFinite(s.roe)&&s.roe<8&&s.roe>=0)bears.push({title:'Subdued Capital Return (ROE '+s.roe.toFixed(1)+'%)',sub:'Return below standard equity hurdle',score:5});
+
+ bulls.sort((a,b)=>b.score-a.score);bears.sort((a,b)=>b.score-a.score);
+ const topBulls=bulls.slice(0,3);if(topBulls.length===0)topBulls.push({title:'Established Business Presence',sub:'Active listed entity in '+(s.sector||'NSE'),score:1});
+ const topBears=bears.slice(0,3);if(topBears.length===0)topBears.push({title:'Clean Balance Sheet Profile',sub:'No critical red flags detected in key metrics',score:1});
+
+ return `<div class="health-checklist-card"><div class="checklist-columns"><div class="checklist-col bull"><div class="checklist-col-title"><span>🟢</span> Strengths (Bull Case)</div><ul class="checklist-items">${topBulls.map(b=>`<li class="checklist-item"><span class="item-icon">✓</span><div class="item-text"><strong>${esc(b.title)}</strong><small>${esc(b.sub)}</small></div></li>`).join('')}</ul></div><div class="checklist-col bear"><div class="checklist-col-title"><span>⚠️</span> Watchouts (Bear Case)</div><ul class="checklist-items">${topBears.map(b=>`<li class="checklist-item"><span class="item-icon">${b.score>1?'⚠':'✓'}</span><div class="item-text"><strong>${esc(b.title)}</strong><small>${esc(b.sub)}</small></div></li>`).join('')}</ul></div></div><div class="ai-research-banner"><div class="ai-banner-content"><div class="ai-banner-icon">🤖</div><div class="ai-banner-text"><strong>AI Deep Dive Report: ${esc(s.name)}</strong><span>1-click 43-point institutional analysis prompt for ChatGPT, Claude & DeepSeek.</span></div></div><button type="button" class="ai-banner-btn" id="aiDeepDiveBtn">✨ Run AI Analysis</button></div></div>`;
+}
+
 function renderOverview(){if(!refreshOverviewList())return;const s=currentStock;
-const cards=[['dividend','Dividend Yield'],['holding','Promoter Holding'],['quick','Quick Ratio'],['pe','P/E Ratio',true],['roe','ROE',true],['book','Book Value'],['intrinsicMin','Intrinsic Value'],['marketCap','Market Cap'],['de','Debt / Equity',true],['fcf','FCF Yield',true],['profitGrowth','Profit Growth YoY',true],['revenueGrowth','Revenue Growth YoY',true],['ev','EV / EBITDA',true],['peg','PEG Ratio',true],['eps','EPS',true],['ratio52','52W vs Current Price'],['ratio15','15W vs Current Price'],['low52','52W Low – High'],['low3','2.5M Low – High'],['volume','Volume'],['current','Current Ratio',true]];
+const cards=[['marketCap','Market Cap'],['pe','P/E Ratio',true],['roe','ROE',true],['eps','EPS',true],['book','Book Value'],['holding','Promoter Holding'],['de','Debt / Equity',true],['profitGrowth','Profit Growth YoY',true],['revenueGrowth','Revenue Growth YoY',true],['fcf','FCF Yield',true],['dividend','Dividend Yield'],['ev','EV / EBITDA',true],['peg','PEG Ratio',true],['current','Current Ratio',true],['quick','Quick Ratio'],['volume','Volume'],['low3','2.5M Low – High'],['ratio15','15W vs Current Price']];
 const averages=STOCK_DATABASE.sectorAverages[s.sector]||{};
-$('#overviewMetrics').innerHTML=`<div class="stock-heading"><div><span id="overviewTicker" class="ticker-pill">NSE:${esc(s.ticker)}</span><span id="overviewSector">${esc(s.sector)}</span></div><div class="stock-title"><h1 id="overviewName">${esc(s.name)}</h1><strong id="overviewPrice">LTP: ${metric('price',s.price)}</strong></div></div>`+cards.map(([k,l,comparison])=>`<div class="overview-metric"><span>${l}</span>${comparison?`<small class="metric-comparison" title="${esc(STOCK_DATABASE.metadata.sectorAverages)}"><span class=sector-avg-short>Sec Avg</span><span class=sector-avg-full>Sector average</span> ${metric(k,averages[k])}</small>`:''}<strong class="${['low52','low3','intrinsicMin'].includes(k)?'metric-range':''}" ${['low52','low3','intrinsicMin'].includes(k)?'tabindex="0"':''}>${(k==='low52'||k==='low3')?metric(k,s[k])+' – '+metric(k==='low52'?'high52':'high3',s[k==='low52'?'high52':'high3']):k==='intrinsicMin'?metric(k,s[k])+' – '+metric('intrinsicMax',s.intrinsicMax):metric(k,s[k])}</strong></div>`).join('');
+$('#overviewMetrics').innerHTML=`<div class="stock-heading"><div><span id="overviewTicker" class="ticker-pill">NSE:${esc(s.ticker)}</span><span id="overviewSector">${esc(s.sector)}</span></div><div class="stock-title"><h1 id="overviewName">${esc(s.name)}</h1><strong id="overviewPrice">LTP: ${metric('price',s.price)}</strong></div></div>`+renderRangeBar(s)+cards.map(([k,l,comparison])=>`<div class="overview-metric"><span>${l}</span>${comparison?`<small class="metric-comparison" title="${esc(STOCK_DATABASE.metadata.sectorAverages)}"><span class=sector-avg-short>Sec Avg</span><span class=sector-avg-full>Sector average</span> ${metric(k,averages[k])}</small>`:''}<strong class="${k==='low3'?'metric-range':''}" ${k==='low3'?'tabindex="0"':''}>${k==='low3'?metric(k,s[k])+' – '+metric('high3',s.high3):metric(k,s[k])}</strong></div>`).join('');
 const oldScore=s.oldScore,scoreDelta=oldScore===null||s.score===null?null:s.score-oldScore,upDays=s.up;
 $('#researchSnapshot').innerHTML=`<div class="snapshot-score"><div class="score-ring" style="--score:${Math.max(0,Math.min(100,s.score))*3.6}deg"><div><strong>${s.score===null?'N/A':Math.round(s.score)}</strong><small>OUT OF 100</small></div></div><div class="score-description"><strong>Fundamental score</strong><p>Based on key financial ratios</p><div class="score-previous"><span>Previous</span><b>${oldScore===null?'Not available':oldScore.toFixed(1)}</b>${scoreDelta===null?'':`<small class="${scoreDelta<0?'negative':'positive'}">(${scoreDelta>0?'+':''}${scoreDelta.toFixed(2)}) ${scoreDelta<0?'▼':'▲'}</small>`}</div></div></div><h3 class="technical-heading">Technical & price momentum</h3><dl class="research-list">${[['200 DMA',metric('dma200',s.dma200)],['90 DMA',metric('dma90',s.dma90)],['Up Days Ratio',`<span class="up-days-bar"><i style="width:${Math.max(0,Math.min(100,upDays))}%"></i></span>`+metric('up',upDays)],['3M Net Growth',`<span class="${s.growth3<0?'negative':'positive'}">${s.growth3>0?'+':''}${metric('growth3',s.growth3)} ${s.growth3===null?'':s.growth3<0?'▼':'▲'}</span>`],['Avg Daily Move',metric('averageMove',s.averageMove)]].map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
+const checklistEl=$('#healthChecklist');if(checklistEl)checklistEl.innerHTML=renderHealthChecklist(s);
+const aiBtn=document.getElementById('aiDeepDiveBtn');if(aiBtn)aiBtn.onclick=()=>{const b=document.getElementById('researchBtn');if(b)b.click();};
 renderValuation(s);
 const prices=s.history;
 historySeries.set(s.ticker,prices);
@@ -60,19 +127,64 @@ async function fetchLiveOverviewData(s) {
    priceEl.innerHTML = `LTP: ${metric('price', s.price)} ${changeHtml} <span class="live-badge" title="Live market data cached every 15 min">LIVE</span>`;
   }
 
+  const hero = document.getElementById('visualRangeHero');
+  if (hero) {
+   const price = Number.isFinite(s.price) ? s.price : 0;
+   const low = Number.isFinite(s.low52) ? s.low52 : price;
+   const high = Number.isFinite(s.high52) ? s.high52 : price;
+   const spread = high > low ? high - low : 1;
+   const pct = Math.max(0, Math.min(100, ((price - low) / spread) * 100));
+
+   const pointer = hero.querySelector('.range-pointer');
+   if (pointer) pointer.style.left = pct.toFixed(1) + '%';
+   const bubble = hero.querySelector('.pointer-bubble');
+   if (bubble) bubble.textContent = '₹' + price.toFixed(2);
+   const lowEl = hero.querySelector('.range-bound.low strong');
+   if (lowEl) lowEl.textContent = '₹' + low.toFixed(2);
+   const highEl = hero.querySelector('.range-bound.high strong');
+   if (highEl) highEl.textContent = '₹' + high.toFixed(2);
+
+   const zoneEl = hero.querySelector('.range-zone-tag');
+   if (zoneEl) {
+    let zoneLabel = 'Mid-Range (' + pct.toFixed(0) + '%)';
+    if (pct <= 25) zoneLabel = '🟢 Near 52W Low (Bargain Zone)';
+    else if (pct >= 75) zoneLabel = '🔥 Near 52W High (Momentum)';
+    else zoneLabel = '⚖️ Mid 52W Range (' + pct.toFixed(0) + '%)';
+    zoneEl.textContent = zoneLabel;
+   }
+
+   const verdictEl = hero.querySelector('.range-verdict');
+   if (verdictEl && Number.isFinite(s.intrinsicMin) && s.intrinsicMin > 0) {
+    const minInt = s.intrinsicMin;
+    const maxInt = Number.isFinite(s.intrinsicMax) ? s.intrinsicMax : minInt;
+    if (price > maxInt) {
+     const over = ((price - maxInt) / maxInt) * 100;
+     verdictEl.innerHTML = '<span class="val-pill overvalued">⚠️ Premium +' + over.toFixed(0) + '%</span>';
+    } else if (price < minInt) {
+     const under = ((minInt - price) / minInt) * 100;
+     verdictEl.innerHTML = '<span class="val-pill undervalued">✨ Undervalued by ' + under.toFixed(0) + '%</span>';
+    } else {
+     verdictEl.innerHTML = '<span class="val-pill fair">🎯 Fair Value Range</span>';
+    }
+   }
+  }
+
   const metricsContainer = $('#overviewMetrics');
   if (metricsContainer) {
    metricsContainer.querySelectorAll('.overview-metric').forEach(el => {
     const label = el.querySelector('span')?.textContent?.trim();
-    if (label === '52W Low – High') {
-     const strong = el.querySelector('strong');
-     if (strong) strong.textContent = metric('low52', s.low52) + ' – ' + metric('high52', s.high52);
-    }
     if (label === 'Volume') {
      const strong = el.querySelector('strong');
      if (strong) strong.textContent = metric('volume', s.volume);
     }
    });
+  }
+
+  const checklistEl = $('#healthChecklist');
+  if (checklistEl) {
+   checklistEl.innerHTML = renderHealthChecklist(s);
+   const aiBtn = document.getElementById('aiDeepDiveBtn');
+   if (aiBtn) aiBtn.onclick = () => { const b = document.getElementById('researchBtn'); if(b) b.click(); };
   }
 
   const prices = s.history;
