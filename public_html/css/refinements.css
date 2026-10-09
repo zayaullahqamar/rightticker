@@ -201,29 +201,58 @@ body>header .account-signin:hover{background:#284e70}
 @media(prefers-reduced-motion:reduce){body>header button{transition:none!important}}
 
 /* Price chart by company identity; highlighting tools beside the history grid. */
-.reference-metrics{grid-template-rows:78px repeat(3,48px)}
-.reference-metrics .stock-heading{display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,47%);grid-template-rows:auto 1fr;gap:5px 10px;align-items:center;padding:0;min-width:0}
-.reference-metrics .stock-heading>div:first-child{grid-column:1;grid-row:1;min-width:0;flex-wrap:wrap;gap:5px}
-.reference-metrics .stock-heading .stock-title{grid-column:1;grid-row:2;min-width:0;margin:0;display:block}
-.reference-metrics .stock-heading .stock-title h1{font-size:20px;line-height:1.2;letter-spacing:-.4px;margin:0;overflow-wrap:anywhere}
-.reference-metrics .stock-heading #overviewPrice{display:none}
-.reference-metrics .stock-heading>.history-chart-row{grid-column:2;grid-row:1/3;display:flex;flex-direction:row;align-items:stretch;gap:7px;padding:7px 9px;margin:0;width:100%;height:74px;min-height:0;background:#fff;border:1px solid #d7e3ef;border-radius:9px;box-shadow:0 2px 6px #112c5008}
-.stock-heading .price-card-summary{min-width:80px;flex:0 0 42%;gap:2px}.stock-heading .price-card-summary strong{font-size:19px}.stock-heading .price-card-label{font-size:8px}.stock-heading .price-card-change{font-size:9px}.stock-heading .price-card-caption{font-size:7px}.stock-heading .price-card-plot{min-width:0;flex:1}.stock-heading .price-card-period{font-size:8px}.stock-heading .history-chart-row .modern-history-chart{width:100%;height:40px;min-height:0;flex:1}.stock-heading .price-card-axis{font-size:7px}
-#historyContent{display:grid!important;grid-template-columns:minmax(0,1fr) 86px;grid-template-rows:auto minmax(0,1fr) auto;gap:7px;min-height:0;flex:1;overflow:hidden;padding:0 2px}
+.reference-metrics{grid-template-rows:repeat(4,52px);gap:5px}
+.reference-metrics .stock-heading{display:contents}
+.reference-metrics .stock-meta{grid-column:span 2;background:#ffffff;border:1px solid #d6e4f0;border-radius:7px;box-shadow:0 1px 2px rgba(15,23,42,0.04);padding:4px 10px;display:flex;flex-direction:column;justify-content:space-between;min-width:0;height:52px;box-sizing:border-box;overflow:hidden;transition:border-color .15s ease,box-shadow .15s ease,transform .12s ease}
+.reference-metrics .stock-meta:hover,.reference-metrics .history-chart-row:hover{border-color:#3b82f6;box-shadow:0 3px 8px rgba(37,99,235,0.1);transform:translateY(-1px)}
+.reference-metrics .stock-pills{display:flex;align-items:center;gap:6px;min-width:0}
+.reference-metrics #overviewTicker.ticker-pill{background:#0f172a;color:#f8fafc;font-weight:700;font-size:11px;border-radius:4px;padding:1px 6px;line-height:1.3}
+.reference-metrics #overviewSector{color:#2563eb;font-weight:700;font-size:11.5px;letter-spacing:-.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reference-metrics .stock-title{min-width:0;margin:0}
+.reference-metrics .stock-title h1{font-size:16.5px;font-weight:700;color:#0f172a;letter-spacing:-.3px;line-height:1.15;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reference-metrics #overviewPrice{display:none!important}
+.reference-metrics .history-chart-row{grid-column:span 1;background:#ffffff;border:1px solid #d6e4f0;border-radius:7px;box-shadow:0 1px 2px rgba(15,23,42,0.04);padding:3px 8px;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:5px;width:100%;height:52px;box-sizing:border-box;min-width:0;overflow:hidden;margin:0;transition:border-color .15s ease,box-shadow .15s ease,transform .12s ease}
+.reference-metrics .price-card-summary{display:flex;flex-direction:column;justify-content:center;gap:1px;min-width:0;flex:0 0 auto}
+.reference-metrics .price-card-label{font-size:8px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#64748b;line-height:1}
+.reference-metrics .price-card-summary strong{font-size:15px;font-weight:800;line-height:1.1;color:#0f172a;letter-spacing:-.3px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.reference-metrics .price-card-change{font-size:9.5px;font-weight:700;line-height:1.1;white-space:nowrap}
+.reference-metrics .price-card-caption{display:none}
+.reference-metrics .price-card-plot{display:flex;flex-direction:column;justify-content:center;align-items:flex-end;min-width:0;flex:1 1 auto;height:100%}
+.reference-metrics .price-card-period{font-size:7.5px;font-weight:700;color:#94a3b8;letter-spacing:.3px;line-height:1;margin-bottom:1px}
+.reference-metrics .history-chart-row .modern-history-chart{height:30px;min-height:0;width:100%;max-width:95px}
+.reference-metrics .price-card-axis{display:none}
+
+#historyContent{display:flex!important;flex-direction:column;gap:6px;min-height:0;flex:1;overflow:hidden;padding:0 2px}
 #historyContent[hidden]{display:none!important}
-#historyContent .history-overview-bar{display:contents}
-#historyContent .support-row{grid-column:1/-1;grid-row:1;margin:6px 0 0;min-width:0}
-#historyContent .history-table-wrap{grid-column:1;grid-row:2;min-width:0;min-height:0;max-height:none;height:auto;margin:0;overflow:auto}
-#historyContent .history-controls{grid-column:2;grid-row:2;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:5px;margin:0;padding:0 1px 2px;min-height:0;overflow-y:auto;overflow-x:hidden}
-#historyContent .history-controls>*{flex-shrink:0;width:100%;min-width:0;margin:0;box-sizing:border-box}
-#historyContent #highlightHistory{order:0;min-height:32px;padding:7px 4px;border-radius:7px;font-size:11px}
-#historyContent .history-target{order:1;padding:5px 6px;min-height:41px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;border-radius:7px}
-#historyContent .history-target input{width:100%;min-width:0;font-size:14px;padding:0}
-#historyContent .flat-stat{order:2}#historyContent .up-stat{order:3}#historyContent .down-stat{order:4}#historyContent #highlightScore{order:5}
-#historyContent .history-controls>span{padding:6px;border-radius:7px;min-height:40px}
-#historyContent #highlightStatus{grid-column:1/-1;grid-row:3;font-size:11px;min-height:0}#historyContent #highlightStatus:empty{display:none}
-@media(max-width:1000px){.reference-metrics{grid-template-rows:none}.reference-metrics .stock-heading{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,46%);grid-template-rows:auto 1fr;gap:5px 9px;padding:5px 0 8px;min-height:82px}.reference-metrics .stock-heading .stock-title h1{font-size:18px}.reference-metrics .stock-heading>.history-chart-row{height:76px}.stock-heading .price-card-summary{min-width:68px}.stock-heading .price-card-summary strong{font-size:16px}#historyContent{height:320px;flex:none;grid-template-columns:minmax(0,1fr) 80px}#historyContent .history-table-wrap{max-height:none}.reference-history{min-width:550px}}
-@media(max-width:500px){.reference-metrics .stock-heading{grid-template-columns:1fr;grid-template-rows:auto auto auto;position:static}.reference-metrics .stock-heading>div:first-child{grid-column:1;grid-row:1}.reference-metrics .stock-heading .stock-title{grid-column:1;grid-row:2}.reference-metrics .stock-heading>.history-chart-row{grid-column:1;grid-row:3;height:80px}.stock-heading .price-card-summary strong{font-size:22px}.stock-heading .price-card-label,.stock-heading .price-card-change{font-size:10px}.stock-heading .price-card-caption{font-size:9px}#historyContent{height:335px;grid-template-columns:minmax(0,1fr) 75px;gap:5px}}
+#historyContent .history-overview-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:3px 1px;min-height:28px;flex-shrink:0}
+#historyContent .support-row{display:flex;align-items:center;gap:6px;min-width:0;margin:0}
+#historyContent .support-row #supportLevels{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+#historyContent .levels-heading{font-size:10px;font-weight:700;letter-spacing:.4px;color:#1e3a8a;text-transform:uppercase;flex-shrink:0}
+#historyContent .levels-chips{display:inline-flex;align-items:center;gap:4px;flex-wrap:nowrap}
+#historyContent .support-level{font-size:10px;font-weight:700;padding:2px 5px;border-radius:4px;line-height:1.2}
+#historyContent .history-controls{display:flex;align-items:center;gap:5px;margin:0;padding:0;min-width:0;flex-wrap:nowrap;margin-left:auto}
+#historyContent .history-controls>span{display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:5px;font-size:10px;font-weight:600;line-height:1.2;white-space:nowrap;font-variant-numeric:tabular-nums;border:1px solid transparent}
+#historyContent .stat-label{font-size:9.5px;font-weight:700;letter-spacing:.2px;text-transform:uppercase}
+#historyContent .stat-count{font-size:11px;font-weight:700}
+#historyContent .stat-percent{font-size:9px;opacity:.85}
+#historyContent .highlight-score{background:#edf4fc;color:#1e40af;border-color:#dbeafe}
+#historyContent .history-target{display:inline-flex;align-items:center;gap:4px;background:#ffffff;border:1px solid #cbd5e1;border-radius:5px;padding:2px 6px;font-size:10px;color:#64748b;font-weight:600}
+#historyContent .history-target input{width:52px;border:none;outline:none;font-size:11.5px;font-weight:700;color:#0f172a;padding:0;background:transparent}
+#historyContent #highlightHistory{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#ffffff;border:none;border-radius:5px;padding:3px 9px;font-size:10.5px;font-weight:700;cursor:pointer;box-shadow:0 1px 3px rgba(37,99,235,0.2);transition:background .15s,transform .1s}
+#historyContent #highlightHistory:hover{background:#1e40af;transform:translateY(-1px)}
+#historyContent .history-table-wrap{width:100%;flex:1;min-height:0;max-height:none;overflow:auto;margin:0;border:1px solid #d5e3ef;border-radius:6px}
+#historyContent #highlightStatus{font-size:10.5px;color:#64748b;padding:2px 4px}
+#historyContent #highlightStatus:empty{display:none}
+
+@media(max-width:1000px){
+  .reference-metrics{grid-template-rows:none}
+  .reference-metrics .stock-heading{display:flex;flex-direction:column;grid-column:1 / -1;gap:6px;height:auto;min-height:0}
+  .reference-metrics .stock-meta{grid-column:auto;width:100%;height:auto;padding:8px 10px;border-radius:8px}
+  .reference-metrics .history-chart-row{grid-column:auto;width:100%;height:60px;padding:6px 10px;border-radius:8px}
+  #historyContent{height:auto;max-height:400px}
+  #historyContent .history-overview-bar{flex-direction:column;align-items:flex-start;gap:6px}
+  #historyContent .history-controls{flex-wrap:wrap;margin-left:0}
+}
 
 /* Research score: balanced gauge, whole-number readout and compact comparison. */
 #researchSnapshot .snapshot-score{display:flex;align-items:center;gap:14px;padding:13px 10px;background:linear-gradient(135deg,#f5fafc,#fff);border:1px solid #e1eaf0;border-radius:12px;box-shadow:none}
@@ -371,13 +400,6 @@ body>header .account-signin:hover{background:#284e70}
 }
 .reference-metrics .overview-metric:not(:has(.metric-comparison)) > strong {
   grid-column: 1 / -1;
-}
-.reference-metrics .stock-heading {
-  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 6px 10px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
 }
 .stock-heading #overviewSector {
   color: #2563eb;
