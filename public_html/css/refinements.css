@@ -306,48 +306,117 @@ body>header .account-signin:hover{background:#284e70}
 
 
 /* ==========================================================================
-   RightTicker Overview Upgrades: Range Bar, Bull & Bear, AI Banner
+   RightTicker Overview Upgrades: Enhanced Boxes, Colors, Bull/Bear, & Valuation Range
    ========================================================================== */
 
-/* 1. Visual 52-Week Range & Valuation Hero Card */
-.visual-range-card {
-  grid-column: span 3;
+/* Attractive Modern Styling for Overview Metric Boxes */
+.reference-metrics .overview-metric {
+  background: #ffffff;
+  border: 1px solid #d6e4f0;
+  border-radius: 7px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+  padding: 5px 8px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: linear-gradient(135deg, #f8fbff 0%, #edf4fc 100%);
-  border: 1px solid #c8dcf0;
+}
+.reference-metrics .overview-metric:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.1);
+  transform: translateY(-1px);
+}
+.reference-metrics .overview-metric > span {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #1d4ed8;
+  letter-spacing: -0.15px;
+  line-height: 1.15;
+}
+.reference-metrics .overview-metric > strong {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.reference-metrics .overview-metric > strong.metric-range {
+  font-size: 13.5px;
+  letter-spacing: -0.35px;
+  color: #1e293b;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.reference-metrics .stock-heading {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  padding: 10px 14px;
+  padding: 6px 10px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+.stock-heading #overviewSector {
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 12px;
+}
+.ticker-pill {
+  background: #0f172a;
+  color: #f8fafc;
+  font-weight: 700;
+  border-radius: 5px;
+  padding: 2px 7px;
+}
+.metric-comparison {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: #475569;
+  font-weight: 600;
+  font-size: 9.5px;
+}
+
+/* 1. Visual 52-Week Range & Valuation Gauge (Adjusted in Valuation Estimate) */
+.visual-range-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #f8fbff 0%, #edf5fc 100%);
+  border: 1px solid #cce1f5;
+  border-radius: 8px;
+  padding: 9px 12px;
   position: relative;
-  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04);
   box-sizing: border-box;
+  margin-bottom: 10px;
 }
 .range-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .range-title {
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 700;
-  color: #172b4d;
-  letter-spacing: -0.2px;
+  color: #1e3a8a;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 .range-verdict {
   display: inline-flex;
   align-items: center;
 }
 .val-pill {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 2px 7px;
   border-radius: 12px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   line-height: 1.2;
 }
 .val-pill.undervalued {
@@ -373,11 +442,11 @@ body>header .account-signin:hover{background:#284e70}
 
 .range-track-container {
   position: relative;
-  margin: 18px 6px 12px;
+  margin: 15px 4px 10px;
 }
 .range-track {
   position: relative;
-  height: 8px;
+  height: 7px;
   border-radius: 4px;
   background: linear-gradient(90deg, #10b981 0%, #3b82f6 50%, #f43f5e 100%);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
@@ -405,13 +474,13 @@ body>header .account-signin:hover{background:#284e70}
 }
 .pointer-bubble {
   position: absolute;
-  bottom: 12px;
+  bottom: 11px;
   background: #0f172a;
   color: #ffffff;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 5px;
+  padding: 1px 6px;
+  border-radius: 4px;
   white-space: nowrap;
   box-shadow: 0 2px 5px rgba(0,0,0,0.25);
   letter-spacing: -0.2px;
@@ -427,8 +496,8 @@ body>header .account-signin:hover{background:#284e70}
   border-color: #0f172a transparent transparent transparent;
 }
 .pointer-pin {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   background: #ffffff;
   border: 3px solid #0f172a;
@@ -439,7 +508,7 @@ body>header .account-signin:hover{background:#284e70}
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 10.5px;
 }
 .range-bound {
   display: flex;
@@ -447,24 +516,24 @@ body>header .account-signin:hover{background:#284e70}
 }
 .range-bound small {
   color: #64748b;
-  font-size: 10px;
+  font-size: 9.5px;
   text-transform: uppercase;
   font-weight: 600;
 }
 .range-bound strong {
   color: #0f172a;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
 }
 .range-bound.high {
   text-align: right;
 }
 .range-zone-tag {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: #334155;
   background: #ffffff;
-  padding: 2px 8px;
+  padding: 1px 7px;
   border-radius: 10px;
   border: 1px solid #d0dbe7;
 }
@@ -472,21 +541,24 @@ body>header .account-signin:hover{background:#284e70}
 /* 2. Bull & Bear Checklist */
 .checklist-panel {
   background: #ffffff;
-  border-radius: 6px;
+  border-radius: 8px;
+  border: 1px solid #dce3ea;
+  box-shadow: 0 3px 8px rgba(23, 51, 75, 0.05);
+  padding: 9px 10px;
 }
 .health-checklist-card {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 .checklist-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 8px;
 }
 .checklist-col {
-  padding: 9px 11px;
-  border-radius: 6px;
+  padding: 8px 10px;
+  border-radius: 7px;
   box-sizing: border-box;
 }
 .checklist-col.bull {
@@ -500,10 +572,10 @@ body>header .account-signin:hover{background:#284e70}
 .checklist-col-title {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  gap: 5px;
+  font-size: 11px;
   font-weight: 700;
-  margin-bottom: 7px;
+  margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
@@ -516,22 +588,22 @@ body>header .account-signin:hover{background:#284e70}
 .checklist-items {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 .checklist-item {
   display: grid;
-  grid-template-columns: 16px 1fr;
+  grid-template-columns: 15px 1fr;
   align-items: baseline;
   gap: 5px;
-  font-size: 11px;
-  line-height: 1.3;
+  font-size: 10.5px;
+  line-height: 1.25;
 }
 .item-icon {
   font-weight: 800;
-  font-size: 12px;
+  font-size: 11.5px;
 }
 .checklist-col.bull .item-icon {
   color: #16a34a;
@@ -541,14 +613,14 @@ body>header .account-signin:hover{background:#284e70}
 }
 .item-text strong {
   display: block;
-  font-size: 11.5px;
+  font-size: 11px;
   color: #0f172a;
 }
 .item-text small {
   display: block;
-  font-size: 10px;
+  font-size: 9.5px;
   color: #64748b;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 /* 3. AI Research Banner */
@@ -556,38 +628,38 @@ body>header .account-signin:hover{background:#284e70}
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #7c3aed 100%);
   color: #ffffff;
-  padding: 9px 12px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
-  margin-top: 4px;
+  padding: 8px 11px;
+  border-radius: 7px;
+  box-shadow: 0 2px 7px rgba(37, 99, 235, 0.22);
+  margin-top: 2px;
 }
 .ai-banner-content {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   min-width: 0;
 }
 .ai-banner-icon {
-  font-size: 22px;
+  font-size: 20px;
   flex-shrink: 0;
 }
 .ai-banner-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
 }
 .ai-banner-text strong {
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 700;
   color: #ffffff;
   line-height: 1.2;
 }
 .ai-banner-text span {
-  font-size: 10.5px;
+  font-size: 10px;
   color: #e0e7ff;
   line-height: 1.2;
   overflow: hidden;
@@ -600,8 +672,8 @@ body>header .account-signin:hover{background:#284e70}
   color: #1e40af;
   border: 0;
   border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 11.5px;
+  padding: 5px 11px;
+  font-size: 11px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -613,16 +685,9 @@ body>header .account-signin:hover{background:#284e70}
   transform: translateY(-1px);
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
 }
-.ai-banner-btn:active {
-  transform: translateY(0);
-}
 
 /* Mobile responsive adjustments */
 @media (max-width: 800px) {
-  .visual-range-card {
-    grid-column: 1 / -1;
-    margin-bottom: 6px;
-  }
   .checklist-columns {
     grid-template-columns: 1fr;
   }

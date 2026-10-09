@@ -50,7 +50,41 @@ function bindHistoryChart(newestFirst){
 const sentimentAdjustments={'Bubble':20,'Extremely Bullish':10,'Bullish':5,'Neutral/SideWay':0,'Bearish':-5,'Severely Bearish':-10,'Panic/Market crash':-25};
 function tradingRanges(low,high,sentiment,expected,low52=null,high52=null){if(!Number.isFinite(low)||!Number.isFinite(high)||low<=0||high<low)return{unavailable:true,expected,entry:[],exit:[],capped:false};const adjustment=sentimentAdjustments[sentiment]??0,entry=[low,high].map(v=>v*(1+adjustment/100)),exit=[low,high].map(v=>v*(1+(adjustment+expected)/100));const bounded=Number.isFinite(low52)&&Number.isFinite(high52)&&low52>0&&high52>=low52,rawExit=[...exit];if(bounded){exit[0]=Math.max(low52,Math.min(high52,exit[0]));exit[1]=Math.max(low52,Math.min(high52,exit[1]));}const capped=exit.some((v,i)=>v!==rawExit[i]);const cents=v=>Math.round((v+Number.EPSILON*Math.abs(v))*100)/100;return{adjustment,expected,capped,bounded,rawExit,entry:entry.map(cents),exit:exit.map(cents),entryAverage:cents((entry[0]+entry[1])/2),exitAverage:cents((exit[0]+exit[1])/2)};}
 function selectedTradingRanges(s){return tradingRanges(s.intrinsicMin,s.intrinsicMax,$('#overviewSentiment').value||'Neutral/SideWay',Number($('#overviewReturn').value||12),s.low52,s.high52);}
-function renderValuation(s){const r=selectedTradingRanges(s);if(r.unavailable){$('#valuationEstimate').innerHTML='<div class=valuation-unavailable>Valuation unavailable</div><p class=valuation-note>The workbook has no valid intrinsic value range for this ticker.</p>';return;}const money=v=>'₹'+v.toFixed(2),min=Math.min(...r.entry,...r.exit),max=Math.max(...r.entry,...r.exit),position=v=>max===min?50:Math.max(0,Math.min(100,(v-min)/(max-min)*100));$('#valuationEstimate').innerHTML=`<span class="valuation-eyebrow">Estimated fair value</span><div class="valuation-range">${money(s.intrinsicMin)} – ${money(s.intrinsicMax)}</div><p class="valuation-note">Valuation base · ${esc($('#overviewSentiment').value||'Neutral/SideWay')} (${r.adjustment>0?'+':''}${r.adjustment}%)</p><div class="valuation-zones"><div class="value-zone entry-zone"><span>Entry zone</span><strong>${r.entry.map(money).join(' – ')}</strong><small>Average <b>${money(r.entryAverage)}</b></small></div><div class="value-zone exit-zone"><span>Exit zone</span><strong>${r.exit.map(money).join(' – ')}</strong><small>Average <b>${money(r.exitAverage)}</b></small></div></div><div id="priceExplorer" class="valuation-comparison"></div><p class="range-formula" title="Entry = valuation × (1 + sentiment adjustment). Exit = valuation × (1 + sentiment adjustment + expected return), limited to the 52-week low–high range. The limit may reduce the target return.">Target return ${r.expected}% · ${r.capped?'exit adjusted to 52W bounds':r.bounded?'exit within 52W bounds':'52W bounds unavailable'}</p>`;renderPriceExplorer(s,r);}
+function renderRangeBar(s){
+ const price=Number.isFinite(s.price)?s.price:0;
+ const low=Number.isFinite(s.low52)?s.low52:price;
+ const high=Number.isFinite(s.high52)?s.high52:price;
+ const spread=high>low?high-low:1;
+ const pct=Math.max(0,Math.min(100,((price-low)/spread)*100));
+ let zoneLabel='Mid-Range ('+pct.toFixed(0)+'%)';
+ if(pct<=25)zoneLabel='🟢 Near 52W Low (Bargain Zone)';
+ else if(pct>=75)zoneLabel='🔥 Near 52W High (Momentum)';
+ else zoneLabel='⚖️ Mid 52W Range ('+pct.toFixed(0)+'%)';
+ let valPill='<span class="val-pill neutral">52-Week Range</span>';
+ let fairZoneHtml='';
+ if(Number.isFinite(s.intrinsicMin)&&s.intrinsicMin>0){
+  const minInt=s.intrinsicMin;
+  const maxInt=Number.isFinite(s.intrinsicMax)?s.intrinsicMax:minInt;
+  if(price>maxInt){
+   const over=((price-maxInt)/maxInt)*100;
+   valPill='<span class="val-pill overvalued">⚠️ Premium +'+over.toFixed(0)+'%</span>';
+  }else if(price<minInt){
+   const under=((minInt-price)/minInt)*100;
+   valPill='<span class="val-pill undervalued">✨ Undervalued by '+under.toFixed(0)+'%</span>';
+  }else{
+   valPill='<span class="val-pill fair">🎯 Fair Value Range</span>';
+  }
+  if(spread>0){
+   const fLeft=Math.max(0,Math.min(100,((minInt-low)/spread)*100));
+   const fRight=Math.max(0,Math.min(100,((maxInt-low)/spread)*100));
+   const fWidth=Math.max(2,fRight-fLeft);
+   fairZoneHtml='<div class="range-fair-zone" style="left:'+fLeft.toFixed(1)+'%;width:'+fWidth.toFixed(1)+'%" title="Estimated Fair Value: ₹'+minInt.toFixed(0)+' – ₹'+maxInt.toFixed(0)+'"></div>';
+  }
+ }
+ return `<div class="visual-range-card" id="visualRangeHero"><div class="range-header"><span class="range-title">52-Week Range & Fair Value Gauge</span><div class="range-verdict">${valPill}</div></div><div class="range-track-container"><div class="range-track">${fairZoneHtml}<div class="range-pointer" style="left:${pct.toFixed(1)}%"><div class="pointer-bubble">₹${price.toFixed(2)}</div><div class="pointer-pin"></div></div></div></div><div class="range-labels"><div class="range-bound low"><small>52W Low</small><strong>₹${low.toFixed(2)}</strong></div><div class="range-zone-tag">${zoneLabel}</div><div class="range-bound high"><small>52W High</small><strong>₹${high.toFixed(2)}</strong></div></div></div>`;
+}
+
+function renderValuation(s){const r=selectedTradingRanges(s);if(r.unavailable){$('#valuationEstimate').innerHTML='<div class=valuation-unavailable>Valuation unavailable</div><p class=valuation-note>The workbook has no valid intrinsic value range for this ticker.</p>';return;}const money=v=>'₹'+v.toFixed(2),min=Math.min(...r.entry,...r.exit),max=Math.max(...r.entry,...r.exit),position=v=>max===min?50:Math.max(0,Math.min(100,(v-min)/(max-min)*100));$('#valuationEstimate').innerHTML=renderRangeBar(s)+`<span class="valuation-eyebrow">Estimated fair value</span><div class="valuation-range">${money(s.intrinsicMin)} – ${money(s.intrinsicMax)}</div><p class="valuation-note">Valuation base · ${esc($('#overviewSentiment').value||'Neutral/SideWay')} (${r.adjustment>0?'+':''}${r.adjustment}%)</p><div class="valuation-zones"><div class="value-zone entry-zone"><span>Entry zone</span><strong>${r.entry.map(money).join(' – ')}</strong><small>Average <b>${money(r.entryAverage)}</b></small></div><div class="value-zone exit-zone"><span>Exit zone</span><strong>${r.exit.map(money).join(' – ')}</strong><small>Average <b>${money(r.exitAverage)}</b></small></div></div><div id="priceExplorer" class="valuation-comparison"></div><p class="range-formula" title="Entry = valuation × (1 + sentiment adjustment). Exit = valuation × (1 + sentiment adjustment + expected return), limited to the 52-week low–high range. The limit may reduce the target return.">Target return ${r.expected}% · ${r.capped?'exit adjusted to 52W bounds':r.bounded?'exit within 52W bounds':'52W bounds unavailable'}</p>`;renderPriceExplorer(s,r);}
 
 function priceScenario(price,current,r){
   return {difference:current>0?price-current:null,change:current>0?(price/current-1)*100:null,returnPct:(r.exitAverage/price-1)*100,
