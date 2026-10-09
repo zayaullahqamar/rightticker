@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 let currentStock=stocks[0],activeView='overview',watchTickers=new Set(),watchReady=false,watchBusy=false,priceTab='history';
 let confirmedWatchTickers=new Set(),watchSyncing=false,watchFeedbackTimer,watchAccount=null;
 const metric=(key,value)=>display(value,columns.find(c=>c.key===key));
@@ -20,6 +20,87 @@ renderSupportLevels(s);bindHistoryChart(prices);
 $('#highlightHistory').onclick=applyHistoryHighlight;$('#historyTarget').onkeydown=e=>{if(e.key==='Enter')applyHistoryHighlight();};applyHistoryHighlight();
 renderProjection(s);
 $('#historyContent').hidden=priceTab!=='history';$('#projectionContent').hidden=priceTab!=='projection';$('#overviewWatch').setAttribute('aria-pressed',String(watchTickers.has(s.ticker)));$('#overviewWatch').setAttribute('aria-label',(watchTickers.has(s.ticker)?'Remove ':'Add ')+s.name+(watchTickers.has(s.ticker)?' from':' to')+' watchlist');$('#overviewWatch').title=watchTickers.has(s.ticker)?'Remove from watchlist':'Add to watchlist';$('#overviewWatch').disabled=!watchReady||watchBusy;
+void fetchLiveOverviewData(s);
+}
+
+let liveFetchController = null;
+async function fetchLiveOverviewData(s) {
+ if (!s || !s.ticker) return;
+ const ticker = s.ticker;
+ if (liveFetchController) {
+  try { liveFetchController.abort(); } catch(e){}
+ }
+ liveFetchController = new AbortController();
+ try {
+  const res = await fetch('/api/stock-live?ticker=' + encodeURIComponent(ticker), { signal: liveFetchController.signal });
+  if (!res.ok) return;
+  const data = await res.json();
+  if (!data || data.ticker !== currentStock.ticker) return;
+  
+  if (Number.isFinite(data.price) && data.price > 0) s.price = data.price;
+  if (Number.isFinite(data.volume) && data.volume > 0) s.volume = data.volume;
+  if (Number.isFinite(data.low52) && Number.isFinite(data.high52)) {
+   s.low52 = data.low52;
+   s.high52 = data.high52;
+  }
+  if (Array.isArray(data.history) && data.history.length >= 5) {
+   s.history = data.history;
+  }
+
+  const priceEl = $('#overviewPrice');
+  if (priceEl && Number.isFinite(s.price)) {
+   let changeHtml = '';
+   if (data.change !== null && data.changePercent !== null) {
+    const isUp = data.change > 0, isDown = data.change < 0;
+    const cls = isUp ? 'positive' : isDown ? 'negative' : 'flat';
+    const arrow = isUp ? '▲' : isDown ? '▼' : '—';
+    const sign = isUp ? '+' : '';
+    changeHtml = `<span class="price-change-tag ${cls}">${sign}₹${Math.abs(data.change).toFixed(2)} (${sign}${data.changePercent.toFixed(2)}%) ${arrow}</span>`;
+   }
+   priceEl.innerHTML = `LTP: ${metric('price', s.price)} ${changeHtml} <span class="live-badge" title="Live market data cached every 15 min">LIVE</span>`;
+  }
+
+  const metricsContainer = $('#overviewMetrics');
+  if (metricsContainer) {
+   metricsContainer.querySelectorAll('.overview-metric').forEach(el => {
+    const label = el.querySelector('span')?.textContent?.trim();
+    if (label === '52W Low – High') {
+     const strong = el.querySelector('strong');
+     if (strong) strong.textContent = metric('low52', s.low52) + ' – ' + metric('high52', s.high52);
+    }
+    if (label === 'Volume') {
+     const strong = el.querySelector('strong');
+     if (strong) strong.textContent = metric('volume', s.volume);
+    }
+   });
+  }
+
+  const prices = s.history;
+  historySeries.set(s.ticker, prices);
+
+  const chartRow = document.querySelector('#overviewMetrics .history-chart-row');
+  if (chartRow) {
+   chartRow.innerHTML = historySparkline(prices);
+   bindHistoryChart(prices);
+  }
+
+  const historyTbody = document.querySelector('.reference-history tbody');
+  if (historyTbody && Array.isArray(prices)) {
+   historyTbody.innerHTML = Array.from({length:10},(_,i)=>'<tr>'+Array.from({length:6},(_,c)=>{
+    const value = prices[c*10+i];
+    return `<td title="${c===0&&i===0?'Latest supplied closing price':(c*10+i+1)+' sessions ago'}"${c===0&&i===0?' class="latest-close"':''}>${Number.isFinite(value)?value.toFixed(2):'N/A'}</td>`;
+   }).join('')+'</tr>').join('');
+  }
+
+  if (priceTab === 'projection') {
+   projectionCache.delete(s.ticker);
+   renderProjection(s);
+  }
+
+  renderValuation(s);
+ } catch(err) {
+  if (err.name !== 'AbortError') console.warn('Live stock fetch:', err);
+ }
 }
 
 function updateStars(){document.querySelectorAll('[data-watch-stock]').forEach(b=>{const saved=watchTickers.has(b.dataset.watchStock);b.textContent=b.classList.contains('remove-watch')?'Remove':saved?'★':'☆';b.setAttribute('aria-pressed',String(saved));b.setAttribute('aria-label',(saved?'Remove ':'Add ')+b.dataset.watchStock+(saved?' from':' to')+' watchlist');b.disabled=!watchReady||watchBusy;});$('#watchCount').textContent=watchTickers.size;}

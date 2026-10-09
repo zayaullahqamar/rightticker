@@ -16,8 +16,9 @@ AddDefaultCharset UTF-8
     RewriteEngine On
     RewriteBase /
 
-    # Route /api/watchlist directly to api/watchlist.php
+    # Route API endpoints directly
     RewriteRule ^api/watchlist/?$ api/watchlist.php [L,QSA]
+    RewriteRule ^api/stock-live/?$ api/stock-live.php [L,QSA]
 
     # Block access to database, backup, and environment files
     RewriteRule \.(sqlite|db|log|sh|sql|bak|config|env)$ - [F,L]

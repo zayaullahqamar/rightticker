@@ -295,3 +295,11 @@ body>header .account-signin:hover{background:#284e70}
 #valuationEstimate .explorer-results strong.positive{color:#047857}#valuationEstimate .explorer-results strong.negative{color:#be3450}
 #valuationEstimate .explorer-hint{font-size:10px;color:#64748b;margin:8px 0 0;line-height:1.4}
 #valuationEstimate input:focus-visible,#valuationEstimate button:focus-visible{outline:2px solid #2563eb;outline-offset:3px}
+/* Live Market Data Pill & Indicators */
+.live-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;text-transform:uppercase;color:#107c2e;background:#e7f7ea;border:1px solid #b2e4be;padding:2px 7px;border-radius:12px;margin-left:8px;vertical-align:middle;letter-spacing:.4px}
+.live-badge::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#28a745;box-shadow:0 0 0 2px rgba(40,167,69,.25);animation:live-pulse 2s infinite}
+@keyframes live-pulse{0%{box-shadow:0 0 0 0 rgba(40,167,69,.5)}70%{box-shadow:0 0 0 6px rgba(40,167,69,0)}100%{box-shadow:0 0 0 0 rgba(40,167,69,0)}}
+.price-change-tag{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:8px;vertical-align:middle}
+.price-change-tag.positive{background:#eaf8eb;color:#1b7a2d}
+.price-change-tag.negative{background:#fdeaea;color:#c91f1f}
+.price-change-tag.flat{background:#f0f3f6;color:#556980}
