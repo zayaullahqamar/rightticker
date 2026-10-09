@@ -316,10 +316,15 @@ body>header .account-signin:hover{background:#284e70}
   border-radius: 7px;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
-  padding: 5px 8px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  padding: 4px 7px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  column-gap: 5px;
+  box-sizing: border-box;
+  min-height: 48px;
+  overflow: visible;
+  position: relative;
 }
 .reference-metrics .overview-metric:hover {
   border-color: #3b82f6;
@@ -327,26 +332,45 @@ body>header .account-signin:hover{background:#284e70}
   transform: translateY(-1px);
 }
 .reference-metrics .overview-metric > span {
-  font-size: 11.5px;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  align-self: start;
+  font-size: 11px;
   font-weight: 600;
   color: #1d4ed8;
   letter-spacing: -0.15px;
   line-height: 1.15;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .reference-metrics .overview-metric > strong {
-  font-size: 18px;
+  grid-column: 1;
+  grid-row: 2;
+  align-self: end;
+  font-size: 17.5px;
   font-weight: 700;
   color: #0f172a;
   letter-spacing: -0.3px;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 .reference-metrics .overview-metric > strong.metric-range {
-  font-size: 13.5px;
+  grid-column: 1 / -1;
+  font-size: 13px;
   letter-spacing: -0.35px;
   color: #1e293b;
   font-weight: 600;
-  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.reference-metrics .overview-metric:not(:has(.metric-comparison)) > strong {
+  grid-column: 1 / -1;
 }
 .reference-metrics .stock-heading {
   background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
@@ -367,14 +391,65 @@ body>header .account-signin:hover{background:#284e70}
   border-radius: 5px;
   padding: 2px 7px;
 }
-.metric-comparison {
+.metric-comparison,
+.reference-metrics .overview-metric .metric-comparison {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: end;
+  margin: 0 0 1px 0;
+  position: static;
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
   border-radius: 4px;
-  padding: 1px 5px;
+  padding: 1px 4px;
   color: #475569;
   font-weight: 600;
   font-size: 9.5px;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.reference-metrics .overview-metric .sector-avg-short {
+  display: inline;
+}
+.reference-metrics .overview-metric .sector-avg-full {
+  display: none;
+}
+
+@media (max-width: 1000px) {
+  .reference-metrics .overview-metric {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 7px;
+    border-radius: 8px;
+    min-height: 82px;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+  .reference-metrics .overview-metric > span {
+    font-size: 11.5px;
+    line-height: 1.2;
+    margin: 0 0 3px 0;
+    min-height: 26px;
+    white-space: normal;
+  }
+  .reference-metrics .overview-metric > strong {
+    font-size: 17px;
+    order: 1;
+    line-height: 1.2;
+    margin-top: 1px;
+    white-space: normal;
+  }
+  .reference-metrics .overview-metric .metric-comparison {
+    order: 2;
+    margin-top: 4px;
+    font-size: 9.5px;
+    white-space: normal;
+    max-width: 100%;
+  }
+  .reference-metrics .overview-metric > strong.metric-range {
+    max-width: 100%;
+    font-size: 13.5px;
+  }
 }
 
 /* 1. Visual 52-Week Range & Valuation Gauge (Adjusted in Valuation Estimate) */
